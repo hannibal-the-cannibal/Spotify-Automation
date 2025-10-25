@@ -16,6 +16,8 @@
         <restassured.version>5.5.0</restassured.version>
         <testng.version>7.10.2</testng.version>
         <jackson.version>2.18.1</jackson.version>
+        <allure.version>2.29.0</allure.version>
+        <aspectj.version>1.9.20.1</aspectj.version>
     </properties>
 
     <dependencyManagement>
@@ -88,7 +90,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JSONassert (Skyscreamer) -->
+        <!-- JSONassert -->
         <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
@@ -126,10 +128,36 @@
             <version>3.14.0</version>
         </dependency>
 
+        <!-- ✅ Allure TestNG -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Optional: Allure Commandline -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-commandline</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ✅ AspectJ Weaver (for Allure runtime weaving) -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectj.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
+
+            <!-- Surefire Plugin (TestNG + Allure + AspectJ agent) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -139,8 +167,22 @@
                         <include>**/*Test.java</include>
                         <include>**/*Tests.java</include>
                     </includes>
+                    <systemPropertyVariables>
+                        <allure.results.directory>target/allure-results</allure.results.directory>
+                    </systemPropertyVariables>
+                    <argLine>
+                        -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
+                    </argLine>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjweaver</artifactId>
+                        <version>${aspectj.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
+
         </plugins>
     </build>
 
